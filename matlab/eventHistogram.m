@@ -1,6 +1,6 @@
 function [histData,eventList] = eventHistogram(eventList,cfg)
 
-cfg.og = eventList.cfg;
+% cfg.og = eventList.cfg;
 cfg = checkCfg(cfg);
 
 if isfield(cfg,'select')
@@ -14,6 +14,8 @@ else
     histData.binEdges = cfg.histBins;
 end
 binCenters = histData.binEdges(1:end-1) + diff(histData.binEdges)/2;
+
+% DEAL WITH PLOTING MULTIPLE EVENTS (DIFFERENT FIGS, SUBPANELS...)
 
 % compute event trial-based histograms
 for iEvent = 1:numel(cfg.events)
@@ -32,12 +34,13 @@ for iEvent = 1:numel(cfg.events)
     if cfg.plotFlag
         plotHist.xdata = binCenters;
         plotHist.ydata = cat(1,histData.(histField){:});
+        plotHist.color = cfg.color;
         if isfield(cfg,'figNumber')
             wfig(cfg.figNumber);
         else
             wfig;
         end
-        avg_err_shade(plotHist)
+        histData.graph = avg_err_shade(plotHist);
         box off
         xlabel 'Bin Center (s)'
         ylabel 'Event count'
@@ -58,4 +61,7 @@ if ~isfield(cfg,'histBins')
 end
 if ~isfield(cfg,'plotFlag')
     cfg.plotFlag = false; 
+end
+if ~isfield(cfg,'color')
+    cfg.color = 'k'; 
 end
