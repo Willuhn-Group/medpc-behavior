@@ -38,14 +38,19 @@ The MedPC event codes are task-specific and defined by the user in `cfg.events`
 | Dependency | Version | Why |
 |---|---|---|
 | MATLAB | R2020a+ | — |
+| matlab-utilities | `main` (untagged) | `getEntry`, `wfig`, `avg_err_shade` |
 
 ## Rules specific to this repo
 - `ephys-induced-polydipsia` calls `getTrials`, `addEvent` and `extractBouts`:
   keep their inputs and output fields backward compatible.
-- `multipelletExample.m` must run from a fresh clone with no edits.
+- This repo must run on its own: `multipelletExample.m` runs from a fresh clone
+  with no edits, once the dependencies listed above are on the MATLAB path.
+  Dependencies on other general-purpose repos are allowed (list them under
+  Dependencies and in the README); dependencies on project repos are not.
 
 ## Known issues / in progress
-- `getTrials.m` calls `read_medpc` (old name); the function is now `readMedpc`.
-- Several headers still use old snake_case names (`read_medpc`, `med_file`, `get_trials`).
-- `multipelletExample.m` hard-codes `M:\GitHub\...`; switch to a path relative to the script.
-- README mentions a `python/` folder that does not exist yet.
+- `matlab-utilities` is untagged; pin a tag under Dependencies and in the README
+  once it has one.
+- `eventHistogram` `checkCfg` falls back to `cfg.og.events` (commented out) and
+  sets `cfg.event` instead of `cfg.events` when `cfg.events` is missing.
+- `addEvent`, `eventHistogram`, `extractBouts` and `medEvents` have no help header.
