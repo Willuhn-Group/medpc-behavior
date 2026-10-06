@@ -5,18 +5,25 @@
 % analysis from the MedPC output file. 
 
 clear; clc
-% repoRoot = fileparts(fileparts(mfilename('fullpath')));
-% addpath(fullfile(repoRoot, 'matlab'));
-% 
-% % medpc-behavior uses getEntry, wfig and avg_err_shade from matlab-utilities
-% % https://github.com/Willuhn-Group/matlab-utilities
-% if ~exist('getEntry', 'file') || ~exist('wfig', 'file') || ~exist('avg_err_shade', 'file')
-%     error('multipelletExample:missingDependency', ...
-%         ['matlab-utilities is not on the MATLAB path.\n' ...
-%          'Clone https://github.com/Willuhn-Group/matlab-utilities and run addpath(genpath(<its folder>)).']);
-% end
+% Find the repo from this script's location. When run section by section,
+% mfilename points to a temporary copy, so use the file open in the Editor.
+scriptFile = mfilename('fullpath');
+repoRoot   = fileparts(fileparts(scriptFile));
+if ~isfolder(fullfile(repoRoot, 'example_data'))
+    % run section by section: mfilename points to a temporary copy,
+    % so use the file open in the Editor instead
+    repoRoot = fileparts(fileparts(matlab.desktop.editor.getActiveFilename));
+end
+addpath(fullfile(repoRoot, 'matlab'));
 
-repoRoot = 'M:\GitHub\medpc-behavior';
+% medpc-behavior uses getEntry, wfig and avg_err_shade from matlab-utilities
+% https://github.com/Willuhn-Group/matlab-utilities
+if ~exist('getEntry', 'file') || ~exist('wfig', 'file') || ~exist('avg_err_shade', 'file')
+    error('multipelletExample:missingDependency', ...
+        ['matlab-utilities is not on the MATLAB path.\n' ...
+         'Clone https://github.com/Willuhn-Group/matlab-utilities and run addpath(genpath(<its folder>)).']);
+end
+
 refFile = fullfile(repoRoot, 'example_data', 'example_rat_multipellet');
 % medData = readMedpc(refFile);
 
@@ -24,8 +31,9 @@ refFile = fullfile(repoRoot, 'example_data', 'example_rat_multipellet');
 % We start by defining a configuration struct. So far, this struct must have 
 % at least the following fields:
 % % 
-% * _*medFile*_: full path of the file to be analyzed [char]
+% * _*medFile*_: full path of the file to be analyzed [char] 
 
+%%
 cfg          = [];
 cfg.medFile  = refFile;
 % % 
@@ -79,31 +87,34 @@ trialStruct = getTrials(cfg);
 % adding the 'mag' variable, which indicates a maganize entry. 
 
 evConfig        = []; 
-evConfig.events = {'mag'};
+evConfig.events = {'magCue1'};
 eventCount = addEvent(trialStruct,evConfig);
 
 %% Add selected variables (from the cfg.events) and include additional behavioral measures
 
 evConfig            = [];
-evConfig.events     = {'mag'};
+evConfig.events     = {'magCue1','magCue4','mag'};
 evConfig.latency    = true; % default = 'false'
 evConfig.firstEvent = true; % default = 'false'
 eventBeh = addEvent(trialStruct,evConfig);
 
-%% Extract data of interest
+%% Rastergram of magazine entries: cue + ITI
 
-entry                 = [];
-entry.count           = [5 15];
-entry.contrast.count  = 'range';
-entry.interval        = 'iti';
-[eventSel,requestConfig] = getEntry(eventBeh.trials,entry);
+rasterCfg           = [];
+rasterCfg.events    = {'magCue1','magCue4','mag'};
+rasterCfg.sectionBy = 'trialLabel';                 % 1p at the bottom, 4p on top
+rasterCfg.colors    = [0 .45 .74; 0 .45 .74; 0 0 0]; % cue entries blue, ITI entries black
+
+wfig(1); clf
+eventRaster(eventBeh, rasterCfg);
+xline(5, 'r--', 'pellet');
 
 %% trial-based event histogram
 
 histCfg = [];
 histCfg.events = 'mag';
 histCfg.plotFlag = true;
-histCfg.figNumber = 1;
+histCfg.figNumber = 2;
 histCfg.histBins = 0:35;
 
 histCfg.select.trialLabel = '4p';
@@ -115,8 +126,15 @@ histCfg.select.trialLabel = '1p';
 histCfg.color = 'r';
 [histData1p,list1p] = eventHistogram(eventBeh,histCfg);
 
+%% Extract data of interest
+
+entry                 = [];
+entry.count           = [5 15];
+entry.contrast.count  = 'range';
+entry.interval        = 'iti';
+[eventSel,requestConfig] = getEntry(eventBeh.trials,entry);
 %% Extract bouts from time stamps vector
-iIti = 6;
+iIti = 2;
 minInterval = 1;
 minDuration = 1;
 
@@ -135,4 +153,19 @@ evConfig.latency = true;
 evConfig.firstEvent = true;
 
 eventBout = addEvent(trialStruct,evConfig);
+
+%% Rastergram of magazine entries: cue + ITI
+evConfig         = [];
+evConfig.events  = {'magCue1','magCue4','mag'};
+evConfig.latency = true;
+eventAll = addEvent(trialStruct,evConfig);
+
+wfig(6); clf
+eventRaster(eventAll, {'magCue1','magCue4','mag'});
+xline(5, 'r--', 'pellet');
+
+%% Only the ITIs
+itiTrials = getEntry(eventAll.trials,'interval','iti');
+wfig(7); clf
+eventRaster(itiTrials, 'mag');      % time 0 = cue offset
 
