@@ -8,7 +8,6 @@
 For researchers analyzing **operant conditioning**, **Pavlovian tasks**, **reinforcement schedules**, or any **MedPC behavioral experiment**.
 
 [![MATLAB](https://img.shields.io/badge/MATLAB-%23E6194B.svg?&style=for-the-badge&logo=MATLAB&logoColor=white)](https://www.mathworks.com)
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 
 ## Features
 
