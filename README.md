@@ -3,7 +3,7 @@
 # medpc-behavior
 
 **Behavioral analysis tools for MedPC files**  
-*MATLAB & Python utilities for rodent behavior analysis from Med Associates chambers*
+*MATLAB & (eventually) Python utilities for rodent behavior analysis from Med Associates chambers*
 
 For researchers analyzing **operant conditioning**, **Pavlovian tasks**, **reinforcement schedules**, or any **MedPC behavioral experiment**.
 
